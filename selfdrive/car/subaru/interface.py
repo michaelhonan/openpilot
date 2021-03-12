@@ -45,12 +45,18 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1568. + STD_CARGO_KG
       ret.wheelbase = 2.67
       ret.centerToFront = ret.wheelbase * 0.5
-      ret.steerRatio = 15
-      ret.steerActuatorDelay = 0.4   # end-to-end angle controller
-      ret.lateralTuning.init('pid')
-      ret.lateralTuning.pid.kf = 0.00005
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 20.], [0., 20.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.3], [0.02, 0.03]]
+      ret.steerRatio = 13
+      ret.steerActuatorDelay = 0.2   # end-to-end angle controller
+
+      MAX_LAT_ACCEL=3.0
+      FRICTION=0.20986563268614938
+
+      ret.lateralTuning.init('torque')
+      ret.lateralTuning.torque.useSteeringAngle = True
+      ret.lateralTuning.torque.kp = 1.0 / MAX_LAT_ACCEL
+      ret.lateralTuning.torque.kf = 1.0 / MAX_LAT_ACCEL
+      ret.lateralTuning.torque.ki = 0.1 / MAX_LAT_ACCEL
+      ret.lateralTuning.torque.friction = FRICTION
 
     elif candidate == CAR.IMPREZA_2020:
       ret.mass = 1480. + STD_CARGO_KG
