@@ -29,8 +29,23 @@ class CarControllerParams:
     elif CP.carFingerprint == CAR.IMPREZA:
       self.STEER_MAX = 3071
     else:
-      self.STEER_MAX = 2047
+      self.STEER_MAX = 3071
 
+  RPM_MIN = 0                   # min cruise_rpm
+  RPM_MAX = 3200                # max cruise_rpm
+  RPM_BASE = 600                # cruise_rpm idle, from stock drive
+  RPM_SCALE = 3000              # cruise_rpm, from testing
+  RPM_DELTA = 50
+
+  THROTTLE_MIN = 0              # min cruise_throttle
+  THROTTLE_MAX = 3400           # max cruise_throttle
+  THROTTLE_BASE = 1810          # cruise_throttle, from stock drive
+  THROTTLE_SCALE = 3000         # from testing
+  THROTTLE_DELTA = 50
+
+  BRAKE_MIN = 0
+  BRAKE_MAX = 400
+  BRAKE_SCALE = 1000            # from testing
 
 class CAR:
   # Global platform
@@ -38,6 +53,7 @@ class CAR:
   IMPREZA = "SUBARU IMPREZA LIMITED 2019"
   IMPREZA_2020 = "SUBARU IMPREZA SPORT 2020"
   FORESTER = "SUBARU FORESTER 2019"
+  CROSSTREK = "SUBARU CROSSTREK LIMITED 2018"
   OUTBACK = "SUBARU OUTBACK 6TH GEN"
   LEGACY = "SUBARU LEGACY 7TH GEN"
 
@@ -60,6 +76,8 @@ CAR_INFO: Dict[str, Union[SubaruCarInfo, List[SubaruCarInfo]]] = {
   CAR.LEGACY: SubaruCarInfo("Subaru Legacy 2020-22", "All", harness=Harness.subaru_b),
   CAR.IMPREZA: [
     SubaruCarInfo("Subaru Impreza 2017-19"),
+  ],
+  CAR.CROSSTREK: [
     SubaruCarInfo("Subaru Crosstrek 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
     SubaruCarInfo("Subaru XV 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
   ],
@@ -123,6 +141,25 @@ FW_VERSIONS = {
       b'\x01\xfe\xfa\x00\x00',
     ],
   },
+  CAR.CROSSTREK: {
+    # 2018 Crosstrek EDM
+    # Ecu, addr, subaddr: ROM ID
+    (Ecu.abs, 0x7b0, None): [
+      b'\x7a\x94\x3f\x90\x00',
+    ],
+    (Ecu.eps, 0x746, None): [
+      b'\x7a\xc0\x0c\x00',
+    ],
+    (Ecu.fwdCamera, 0x787, None): [
+      b'\x00\x00\x64\xb5\x1f\x40\x20\x0e',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'\xaa\x61\x66\x73\x07',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xe3\xe5\x46\x31\x00',
+    ],
+  },
   CAR.LEGACY: {
     (Ecu.abs, 0x7b0, None): [
       b'\xa1\\  x04\x01',
@@ -150,7 +187,6 @@ FW_VERSIONS = {
   },
   CAR.IMPREZA: {
     (Ecu.abs, 0x7b0, None): [
-      b'\x7a\x94\x3f\x90\x00',
       b'\xa2 \x185\x00',
       b'\xa2 \x193\x00',
       b'\xa2 \x194\x00',
@@ -165,7 +201,6 @@ FW_VERSIONS = {
       b'z\x94\x0c\x90\x00',
     ],
     (Ecu.eps, 0x746, None): [
-      b'\x7a\xc0\x0c\x00',
       b'z\xc0\x08\x00',
       b'\x8a\xc0\x00\x00',
       b'z\xc0\x04\x00',
@@ -174,7 +209,6 @@ FW_VERSIONS = {
       b'z\xc0\n\x00',
     ],
     (Ecu.fwdCamera, 0x787, None): [
-      b'\x00\x00\x64\xb5\x1f\x40\x20\x0e',
       b'\x00\x00d\xdc\x1f@ \x0e',
       b'\x00\x00e\x1c\x1f@ \x14',
       b'\x00\x00d)\x1f@ \a',
@@ -189,7 +223,6 @@ FW_VERSIONS = {
       b'\x00\x00c\xf4\x1f@ \x07',
     ],
     (Ecu.engine, 0x7e0, None): [
-      b'\xaa\x61\x66\x73\x07',
       b'\xbeacr\a',
       b'\xc5!`r\a',
       b'\xaa!ds\a',
@@ -209,7 +242,6 @@ FW_VERSIONS = {
       b'\xaa!av\x07',
     ],
     (Ecu.transmission, 0x7e1, None): [
-      b'\xe3\xe5\x46\x31\x00',
       b'\xe4\xe5\x061\x00',
       b'\xe5\xf5\x04\x00\x00',
       b'\xe3\xf5G\x00\x00',
@@ -513,6 +545,7 @@ DBC = {
   CAR.IMPREZA: dbc_dict('subaru_global_2017_generated', None),
   CAR.IMPREZA_2020: dbc_dict('subaru_global_2017_generated', None),
   CAR.FORESTER: dbc_dict('subaru_global_2017_generated', None),
+  CAR.CROSSTREK: dbc_dict('subaru_global_2017_generated', None),
   CAR.OUTBACK: dbc_dict('subaru_global_2017_generated', None),
   CAR.LEGACY: dbc_dict('subaru_global_2017_generated', None),
   CAR.FORESTER_PREGLOBAL: dbc_dict('subaru_forester_2017_generated', None),
@@ -521,5 +554,5 @@ DBC = {
   CAR.OUTBACK_PREGLOBAL_2018: dbc_dict('subaru_outback_2019_generated', None),
 }
 
-GLOBAL_GEN2 = (CAR.OUTBACK, CAR.LEGACY)
-PREGLOBAL_CARS = (CAR.FORESTER_PREGLOBAL, CAR.LEGACY_PREGLOBAL, CAR.OUTBACK_PREGLOBAL, CAR.OUTBACK_PREGLOBAL_2018)
+GLOBAL_GEN2 = {CAR.OUTBACK, CAR.LEGACY}
+PREGLOBAL_CARS = {CAR.FORESTER_PREGLOBAL, CAR.LEGACY_PREGLOBAL, CAR.OUTBACK_PREGLOBAL, CAR.OUTBACK_PREGLOBAL_2018}
