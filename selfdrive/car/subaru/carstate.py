@@ -83,7 +83,14 @@ class CarState(CarStateBase):
       ret.stockAeb = (cp_es_distance.vl["ES_Brake"]["AEB_Status"] == 8) and \
                      (cp_es_distance.vl["ES_Brake"]["Brake_Pressure"] != 0)
       self.es_lkas_state_msg = copy.copy(cp_cam.vl["ES_LKAS_State"])
-
+      cp_es_brake = cp_body if self.car_fingerprint in GLOBAL_GEN2 else cp_cam
+      self.aeb = cp_es_brake.vl["ES_Brake"]["Cruise_Brake_Active"]
+      self.es_brake_msg = copy.copy(cp_es_brake.vl["ES_Brake"])
+      cp_es_status = cp_body if self.car_fingerprint in GLOBAL_GEN2 else cp_cam
+      self.es_status_msg = copy.copy(cp_es_status.vl["ES_Status"])
+      self.cruise_control_msg = copy.copy(cp_cruise.vl["CruiseControl"])
+      self.brake_status_msg = copy.copy(cp_brakes.vl["Brake_Status"])
+    cp_es_distance = cp_body if self.car_fingerprint in GLOBAL_GEN2 else cp_cam
     self.es_distance_msg = copy.copy(cp_es_distance.vl["ES_Distance"])
     self.es_dashstatus_msg = copy.copy(cp_cam.vl["ES_DashStatus"])
     if self.CP.flags & SubaruFlags.SEND_INFOTAINMENT:
@@ -94,13 +101,21 @@ class CarState(CarStateBase):
   @staticmethod
   def get_common_global_body_signals():
     signals = [
+      ("COUNTER", "CruiseControl"),
+      ("Signal1", "CruiseControl"),
       ("Cruise_On", "CruiseControl"),
       ("Cruise_Activated", "CruiseControl"),
+      ("Signal2", "CruiseControl"),
       ("FL", "Wheel_Speeds"),
       ("FR", "Wheel_Speeds"),
       ("RL", "Wheel_Speeds"),
       ("RR", "Wheel_Speeds"),
+      ("COUNTER", "Brake_Status"),
+      ("Signal1", "Brake_Status"),
+      ("ES_Brake", "Brake_Status"),
+      ("Signal2", "Brake_Status"),
       ("Brake", "Brake_Status"),
+      ("Signal3", "Brake_Status"),
     ]
     checks = [
       ("CruiseControl", 20),
@@ -113,8 +128,6 @@ class CarState(CarStateBase):
   @staticmethod
   def get_common_global_es_signals():
     signals = [
-      ("AEB_Status", "ES_Brake"),
-      ("Brake_Pressure", "ES_Brake"),
       ("COUNTER", "ES_Distance"),
       ("CHECKSUM", "ES_Distance"),
       ("Signal1", "ES_Distance"),
@@ -135,11 +148,34 @@ class CarState(CarStateBase):
       ("Cruise_Set", "ES_Distance"),
       ("Cruise_Resume", "ES_Distance"),
       ("Signal6", "ES_Distance"),
+
+      ("COUNTER", "ES_Status"),
+      ("Signal1", "ES_Status"),
+      ("Cruise_Fault", "ES_Status"),
+      ("Cruise_RPM", "ES_Status"),
+      ("Signal2", "ES_Status"),
+      ("Cruise_Activated", "ES_Status"),
+      ("Brake_Lights", "ES_Status"),
+      ("Cruise_Hold", "ES_Status"),
+      ("Signal3", "ES_Status"),
+
+      ("COUNTER", "ES_Brake"),
+      ("Signal1", "ES_Brake"),
+      ("AEB_Status", "ES_Brake"),
+      ("Brake_Pressure", "ES_Brake"),
+      ("Cruise_Brake_Lights", "ES_Brake"),
+      ("Cruise_Brake_Fault", "ES_Brake"),
+      ("Cruise_Brake_Active", "ES_Brake"),
+      ("Cruise_Activated", "ES_Brake"),
+      ("Signal3", "ES_Brake"),
+
     ]
 
     checks = [
       ("ES_Brake", 20),
       ("ES_Distance", 20),
+      ("ES_Status", 20),
+      ("ES_Brake", 20),
     ]
 
     return signals, checks
@@ -154,6 +190,7 @@ class CarState(CarStateBase):
       ("Steer_Error_1", "Steering_Torque"),
       ("Brake_Pedal", "Brake_Pedal"),
       ("Throttle_Pedal", "Throttle"),
+      ("Throttle_Cruise", "Throttle"),
       ("LEFT_BLINKER", "Dashlights"),
       ("RIGHT_BLINKER", "Dashlights"),
       ("SEATBELT_FL", "Dashlights"),
@@ -162,6 +199,7 @@ class CarState(CarStateBase):
       ("DOOR_OPEN_RR", "BodyInfo"),
       ("DOOR_OPEN_RL", "BodyInfo"),
       ("Gear", "Transmission"),
+      ("WIPERS", "BodyInfo"),
     ]
 
     checks = [
@@ -190,6 +228,7 @@ class CarState(CarStateBase):
 
       signals += [
         ("Steer_Warning", "Steering_Torque"),
+        ("RPM", "Transmission"),
         ("UNITS", "Dashlights"),
       ]
 
@@ -303,10 +342,13 @@ class CarState(CarStateBase):
         ("LKAS_Right_Line_Visible", "ES_LKAS_State"),
         ("LKAS_Alert", "ES_LKAS_State"),
         ("Signal3", "ES_LKAS_State"),
+
       ]
 
       checks = [
         ("ES_DashStatus", 10),
+        ("ES_Status", 20),
+        ("ES_Brake", 20),
         ("ES_LKAS_State", 10),
       ]
 
