@@ -25,7 +25,7 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 40
     elif CP.carFingerprint == CAR.SUBARU_IMPREZA_2020:
       self.STEER_MAX = 1439
-    elif CP.carFingerprint == CAR.IMPREZA:
+    elif CP.carFingerprint == CAR.SUBARU_IMPREZA:
       self.STEER_MAX = 3071
     else:
       self.STEER_MAX = 2047
