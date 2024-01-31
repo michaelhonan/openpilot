@@ -94,7 +94,7 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [0.25, 1.0, 1.5]
       ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.6, 0.36]
+      ret.longitudinalTuning.kiV = [0.45, 0.36]
 
       ret.stoppingControl = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_LONG
